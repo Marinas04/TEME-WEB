@@ -1,0 +1,25 @@
+[
+  {
+    "name": "Central Library",
+    "type": "study",
+    "location": "Building A",
+    "program": "08:00 - 20:00",
+    "tags": ["study", "books", "quiet"]
+  },
+
+  {
+    "name": "Campus Cafeteria",
+    "type": "food",
+    "location": "Building B",
+    "program": "08:00 - 18:00",
+    "tags": ["food", "students"]
+  },
+
+  {
+    "name": "Study Room",
+    "type": "study",
+    "location": "Building C",
+    "program": "09:00 - 22:00",
+    "tags": ["study", "group work"]
+  }
+]
