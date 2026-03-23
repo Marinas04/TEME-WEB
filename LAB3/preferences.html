@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Setări Preferințe</title>
+    <link rel="stylesheet" href="style.css"> </head>
+<body>
+    <nav>
+        <a href="index.html">Pagina Principală</a> | 
+        <a href="auth.html">Login/Register</a>
+    </nav>
+
+    <div class="container">
+        <h2>Setări Aspect și Limbă</h2>
+        <form id="prefs-form">
+            <div class="form-group">
+                <label>Alege Tema:</label>
+                <select id="p-theme">
+                    <option value="light">Luminos (Light)</option>
+                    <option value="dark">Întunecat (Dark)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Alege Limba:</label>
+                <select id="p-lang">
+                    <option value="ro">Română</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+
+            <button type="submit">Salvează Preferințele</button>
+        </form>
+        <div id="status-msg"></div>
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+
+    <script>
+        // FUNCȚIE CARE APLICĂ SETĂRILE IMEDIAT
+        function applySettings() {
+            // 1. Aplică Tema din Cookie
+            const savedTheme = CookieManager.get('theme') || 'light';
+            document.body.className = savedTheme; // Aceasta linie caută .dark sau .light în CSS
+            document.getElementById('p-theme').value = savedTheme;
+
+            // 2. Aplică Limba din LocalStorage
+            const savedLang = StorageManager.getLocal('user_lang') || 'ro';
+            document.getElementById('p-lang').value = savedLang;
+            
+            // Schimbăm titlul în funcție de limbă ca test
+            if(savedLang === 'en') {
+                document.querySelector('h2').innerText = "Appearance & Language Settings";
+            } else {
+                document.querySelector('h2').innerText = "Setări Aspect și Limbă";
+            }
+        }
+
+        // Când se încarcă pagina, aplicăm ce avem salvat
+        window.onload = applySettings;
+
+        // Când dăm click pe butonul de Salvare
+        document.getElementById('prefs-form').onsubmit = function(e) {
+            e.preventDefault();
+
+            // Luăm valorile selectate de utilizator
+            const selectedTheme = document.getElementById('p-theme').value;
+            const selectedLang = document.getElementById('p-lang').value;
+
+            // SALVĂM: Tema în Cookie (pe 30 de zile) și Limba în LocalStorage
+            CookieManager.set('theme', selectedTheme, 30);
+            StorageManager.setLocal('user_lang', selectedLang);
+
+            // APLICĂM IMEDIAT pe pagină
+            applySettings();
+
+            // Afișăm un mesaj de succes
+            const msg = document.getElementById('status-msg');
+            msg.innerHTML = "<p class='alert-success'>Preferințe salvate cu succes!</p>";
+            
+            // Opțional: Refresh după 1 secundă ca să vezi schimbarea peste tot
+            setTimeout(() => { msg.innerHTML = ""; }, 2000);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Autentificare - Laborator 3</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .hidden { display: none; }
+        .toggle-link { cursor: pointer; color: #4CAF50; text-decoration: underline; }
+        .auth-box { max-width: 400px; margin: 50px auto; }
+    </style>
+</head>
+<body class="light">
+    <nav>
+        <a href="index.html">Home</a>
+    </nav>
+
+    <div class="container auth-box">
+        <div id="login-sect">
+            <h2>Autentificare</h2>
+            <form id="login-form">
+                <input type="text" id="l-user" placeholder="Username" required>
+                <input type="password" id="l-pass" placeholder="Parolă" required>
+                <label><input type="checkbox" id="l-rem"> Ține-mă minte</label>
+                <button type="submit">Intră în cont</button>
+            </form>
+            <p>Nu ai cont? <span class="toggle-link" onclick="toggleAuth()">Înregistrează-te aici</span></p>
+        </div>
+
+        <div id="register-sect" class="hidden">
+            <h2>Creare Cont Nou</h2>
+            <form id="register-form">
+                <input type="text" id="r-user" placeholder="Username (min 3)" minlength="3" required>
+                <input type="email" id="r-email" placeholder="Email" required>
+                <input type="password" id="r-pass" placeholder="Parolă (min 6)" minlength="6" required>
+                <input type="password" id="r-confirm" placeholder="Confirmă Parola" required>
+                <button type="submit" style="background-color: #2196F3;">Creează Cont</button>
+            </form>
+            <p>Ai deja cont? <span class="toggle-link" onclick="toggleAuth()">Loghează-te aici</span></p>
+        </div>
+
+        <div id="msg"></div>
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+
+    <script>
+        // 1. Aplicăm tema salvată
+        document.body.className = CookieManager.get('theme') || 'light';
+
+        // 2. Inițializăm useri de test dacă LocalStorage e gol
+        if (!StorageManager.getLocal('users')) {
+            StorageManager.setLocal('users', [
+                { username: 'admin', password: 'password', email: 'admin@test.com' }
+            ]);
+        }
+
+        // 3. Funcție pentru a schimba între Login și Register
+        function toggleAuth() {
+            document.getElementById('login-sect').classList.toggle('hidden');
+            document.getElementById('register-sect').classList.toggle('hidden');
+            document.getElementById('msg').innerHTML = '';
+        }
+
+        // 4. LOGICA DE LOGIN
+        document.getElementById('login-form').onsubmit = (e) => {
+            e.preventDefault();
+            const u = document.getElementById('l-user').value;
+            const p = document.getElementById('l-pass').value;
+            const rem = document.getElementById('l-rem').checked;
+            
+            const users = StorageManager.getLocal('users') || [];
+            const found = users.find(user => user.username === u && user.password === p);
+
+            if (found) {
+                // Salvăm sesiunea (Cerința 3.2.2)
+                StorageManager.setSession('currentUser', {
+                    username: found.username,
+                    email: found.email,
+                    loginTime: new Date().getTime()
+                });
+
+                if (rem) CookieManager.set('savedUser', u, 30);
+                
+                document.getElementById('msg').innerHTML = "<p class='alert-success'>Login reușit! Redirecționare...</p>";
+                setTimeout(() => location.href = 'dashboard.html', 1000);
+            } else {
+                document.getElementById('msg').innerHTML = "<p class='alert-error'>Username sau parolă greșită!</p>";
+            }
+        };
+
+        // 5. LOGICA DE REGISTER
+        document.getElementById('register-form').onsubmit = (e) => {
+            e.preventDefault();
+            const u = document.getElementById('r-user').value;
+            const em = document.getElementById('r-email').value;
+            const p = document.getElementById('r-pass').value;
+            const conf = document.getElementById('r-confirm').value;
+
+            if (p !== conf) {
+                document.getElementById('msg').innerHTML = "<p class='alert-error'>Parolele nu coincid!</p>";
+                return;
+            }
+
+            let users = StorageManager.getLocal('users') || [];
+            if (users.find(user => user.username === u)) {
+                document.getElementById('msg').innerHTML = "<p class='alert-error'>Username-ul există deja!</p>";
+                return;
+            }
+
+            // Salvăm userul nou
+            users.push({ username: u, password: p, email: em });
+            StorageManager.setLocal('users', users);
+            
+            document.getElementById('msg').innerHTML = "<p class='alert-success'>Cont creat! Acum te poți loga.</p>";
+            setTimeout(() => toggleAuth(), 1500);
+        };
+    </script>
+</body>
+</html>
